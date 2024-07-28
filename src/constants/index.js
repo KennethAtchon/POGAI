@@ -18,7 +18,7 @@ export const navLinks = [
     title: "Log In",
   },
   {
-    id: "register",
+    id: "signup",
     title: "Register",
   },
 ];
@@ -173,3 +173,8 @@ export const clients = [
     logo: dropbox,
   },
 ];
+
+export const urlendpoint = {
+    id: "urlendpoint",
+    value: "http://127.0.0.1:5000",
+  };

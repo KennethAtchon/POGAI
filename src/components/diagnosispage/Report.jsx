@@ -5,8 +5,58 @@ import Locationimage from '../../assets/location.png';
 import Scheduleimage from '../../assets/schedule.png';
 import Calendarimage from '../../assets/calendar.png';
 import ButtonCTA from "../tools/ButtonCTA";
+import { urlendpoint } from '../../constants';
+
 
 const Report = () => {
+
+  const handleGetPatient = async () => {
+    try {
+      const response = await fetch(`${urlendpoint.value}/api/get_patient`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Assuming the JWT token is stored in localStorage
+        }
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Patient data retrieved successfully", data);
+        // Process the data as needed
+      } else {
+        const errorData = await response.json();
+        console.error("Error retrieving patient data:", errorData);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+
+  const handleGetPromptResults = async (promptId) => {
+    try {
+      const response = await fetch(`${urlendpoint.value}/api/get_prompt_results`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}` // Assuming the JWT token is stored in localStorage
+        },
+        body: JSON.stringify({ prompt_id: promptId })
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Prompt results retrieved successfully", data);
+        // Process the data as needed
+      } else {
+        const errorData = await response.json();
+        console.error("Error retrieving prompt results:", errorData);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+    }
+  };
+
   return (
     <>
       <section id="report" className={`flex flex-col mb-4`}>

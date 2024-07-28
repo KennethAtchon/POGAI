@@ -3,7 +3,7 @@ import styles from "../../style";
 import diagnosisImage from "../../assets/diagnosis.png";
 import SymptomCheckerImage from "../../assets/symptomchecker.png";
 import ButtonCTA from "../tools/ButtonCTA";
-
+import { urlendpoint } from '../../constants';
 
 
 const Checker = () => {
@@ -16,7 +16,7 @@ const Checker = () => {
    const handleButtonClick = async () => {
     console.log("Button clicked! Symptoms:", symptoms);
     try {
-      const response = await fetch('http://localhost:5000/add_prompt', {
+      const response = await fetch(`${urlendpoint.value}/api/add_prompt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ const Checker = () => {
                 />
               </div>
               <div className="flex-[1] flex justify-end">
-                <ButtonCTA ButtonName="DIAGNOSIS NOW" ButtonBgColor="#FF0031" ButtonFunc={handleButtonClick} />
+                <ButtonCTA ButtonName="DIAGNOSIS NOW" ButtonBgColor="#FF0031" ButtonFunc={handleButtonClick} ButtonTextColor="#FDFEFF"/>
               </div>
             </div>
           </div>

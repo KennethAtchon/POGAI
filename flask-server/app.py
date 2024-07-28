@@ -16,6 +16,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, JWTManager, creat
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
@@ -93,17 +97,16 @@ def predict_disease(text_data):
     return predictions['final_prediction']
 
  
- # DATABASE CODE
+# DATABASE CODE
  
 # Configure the SQLAlchemy part of the app instance
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:{ENV}@localhost/{ENV}'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(16))
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 jwt = JWTManager(app)
-
 
 
 # Initialize the SQLAlchemy instance with the app
@@ -127,7 +130,7 @@ app.cli.add_command(create_tables)
 
 
 # Define a route to add a new user
-@app.route('/add_user', methods=['POST'])
+@app.route('/api/add_user', methods=['POST'])
 def add_user():
     data = request.get_json()
     username = data.get('username')
@@ -149,16 +152,17 @@ def add_user():
     user_data = {'id': user.id, 'email': user.email}
     token = create_access_token(identity=user.id, additional_claims=user_data)
 
-    return jsonify({'message': f'Added user {username} with email {email}', 'token': token}), 201
+    response = jsonify({'message': f'Added user {username} with email {email}', 'token': token})
+    return response
 
 
 # Define a route to get all users
-@app.route('/users', methods=['GET'])
+@app.route('/api/users', methods=['GET'])
 def get_users():
     users = User.query.all()
     return jsonify({'users': [{'username': user.username, 'email': user.email} for user in users]})
 
-@app.route('/get_user', methods=['POST'])
+@app.route('/api/get_user', methods=['POST'])
 def get_user():
     data = request.get_json()
     email = data.get('email')
@@ -175,10 +179,11 @@ def get_user():
     user_data = {'id': user.id, 'email': user.email}
     token = create_access_token(identity=user.id, additional_claims=user_data)
 
-    return jsonify({'message': 'User found', 'user': {'username': user.username, 'email': user.email}, 'token': token}), 200
+    response = jsonify({'message': 'User found', 'user': {'username': user.username, 'email': user.email}, 'token': token})
+    return response, 200
 
 # generate a reset link and send to the users email
-@app.route('/forgot_password', methods=['POST'])
+@app.route('/api/forgot_password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
     email = data.get('email')
@@ -197,7 +202,7 @@ def forgot_password():
     return jsonify({'message': 'Password reset link has been sent to your email', 'reset_link': reset_link}), 200
 
 # resets the users password
-@app.route('/reset_password', methods=['POST'])
+@app.route('/api/reset_password', methods=['POST'])
 def reset_password():
     data = request.get_json()
     # token sent by forget password
@@ -225,7 +230,7 @@ def reset_password():
 
     return jsonify({'message': 'Password has been reset successfully'}), 200
 
-@app.route('/add_prompt', methods=['POST'])
+@app.route('/api/add_prompt', methods=['POST'])
 @jwt_required()  # Requires a valid JWT token
 def add_prompt():
     current_user_id = get_jwt_identity()  # Get the current user's ID from the JWT token
@@ -248,7 +253,7 @@ def add_prompt():
 
     return jsonify({'message': 'Prompt added successfully', 'prompt_id': new_prompt.id}), 201
 
-@app.route('/get_prompt', methods=['POST'])
+@app.route('/api/get_prompt', methods=['POST'])
 @jwt_required()
 def get_prompt():
     current_user_id = get_jwt_identity()  # Get the current user's ID from the JWT token
@@ -274,7 +279,7 @@ def get_prompt():
     }), 200
 
 
-@app.route('/get_prompt_results', methods=['POST'])
+@app.route('/api/get_prompt_results', methods=['POST'])
 @jwt_required()
 def get_prompt_results():
     data = request.get_json()
@@ -293,7 +298,7 @@ def get_prompt_results():
         'results': [{'id': result.id, 'result': result.result, 'created_at': result.created_at} for result in results]
     }), 200
 
-@app.route('/add_patient', methods=['POST'])
+@app.route('/api/add_patient', methods=['POST'])
 @jwt_required()
 def add_patient():
     current_user_id = get_jwt_identity()  # Get the current user's ID from the JWT token
@@ -324,7 +329,7 @@ def add_patient():
 
     return jsonify({'message': 'Patient added successfully', 'profile_id': new_user_profile.id}), 201
 
-@app.route('/get_patient', methods=['GET'])
+@app.route('/api/get_patient', methods=['GET'])
 @jwt_required()
 def get_patient():
     current_user_id = get_jwt_identity()  # Get the current user's ID from the JWT token
